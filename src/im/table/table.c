@@ -86,6 +86,7 @@ static inline unsigned int GetTableMod(TableMetaData* table)
 
 boolean LoadTableConfig(TableConfig* config)
 {
+    fputs("LOL:LoadTableConfig\n", stderr);
     FcitxConfigFileDesc* configDesc = GetTableGlobalConfigDesc();
     if (configDesc == NULL)
         return false;
