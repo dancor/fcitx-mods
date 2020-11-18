@@ -1,0 +1,21 @@
+From: Boyuan Yang <byang@debian.org>
+Date: Wed, 8 Jan 2020 16:18:45 -0500
+Subject: cmake/FindEnchant.cmake: Add patch for enchant-2 compatibility
+
+---
+ cmake/FindEnchant.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmake/FindEnchant.cmake b/cmake/FindEnchant.cmake
+index 7c182e6..9db5c3b 100644
+--- a/cmake/FindEnchant.cmake
++++ b/cmake/FindEnchant.cmake
+@@ -39,7 +39,7 @@ if(ENCHANT_INCLUDE_DIR AND ENCHANT_LIBRARIES)
+   #include <stdlib.h>
+   #include <stddef.h>
+   #include <string.h>
+-  #include <enchant/enchant.h>
++  #include <enchant-2/enchant.h>
+ 
+   EnchantBroker *enchant_broker_init();
+   char **enchant_dict_suggest(EnchantDict *dict, const char *str,
