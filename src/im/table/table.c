@@ -367,14 +367,20 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
 {
     fprintf(stderr, "LOL:DoTableInput %d\t%d\t%d\n", k, store_n, store[0]);
     if (FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
+    // https://en.wikipedia.org/wiki/Diacritic
     switch (store_n) {
     case 0: if (k == '\'') g else return IRV_TO_PROCESS;
     case 1: switch (k) {
         case '\'': e("'")
-        case '1': e("¡")
-        case '/': e("¿")
-        case 'a': case 'c': case 'e': case 'i': case 'n': case 'o': case 'u': g
-        case 'h': e("ʻ")
+        case 'C': e("Ç")
+        case 'N': e("Ñ")
+        case 'c': e("ç")
+        case 'h': e("ʻ") // ʻokina (Hawaiʻi)
+        case 'n': e("ñ")
+        case ':': e("ː") // triangular colon (IPA long vowels)
+        case '`': case '1': case '2': case '3': case '4': case '5': case '.': 
+        case '6': case '9': case ';': case ',': case '/': case 'A': case 'a': 
+        case 'o': g
         default: no_match}
     default: switch (store[1]) {
     case '`': switch (k) { // tilde
@@ -384,6 +390,7 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
         case 'o': e("õ") case 'u': e("ũ")
         default: no_match}
     case '1': switch (k) { // macron
+        case '1': e("¡")
         case 'A': e("Ā") case 'E': e("Ē") case 'I': e("Ī")
         case 'O': e("Ō") case 'U': e("Ū")
         case 'a': e("ā") case 'e': e("ē") case 'i': e("ī")
@@ -395,7 +402,7 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
         case 'a': e("á") case 'e': e("é") case 'i': e("í")
         case 'o': e("ó") case 'u': e("ú")
         default: no_match}
-    case '3': switch (k) { // caron (aka háček)
+    case '3': switch (k) { // caron (aka háček, wedge)
         case 'A': e("Ǎ") case 'E': e("Ě") case 'I': e("Ǐ")
         case 'O': e("Ǒ") case 'U': e("Ǔ")
         case 'a': e("ǎ") case 'e': e("ě") case 'i': e("ǐ")
@@ -437,6 +444,15 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
         case 'a': e("ä") case 'e': e("ë") case 'i': e("ï")
         case 'o': e("ö") case 'u': e("ü")
         default: no_match}
+    case ',': switch (k) { // cedilla
+        case 'C': e("Ç")
+        case 'c': e("ç")
+        default: no_match}
+    case '/': switch (k) {
+        case '/': e("¿")
+        case 'O': e("Ø")
+        case 'o': e("ø")
+        default: no_match}
     case 'A': switch (k) {
         case 'E': e("Æ")
         default: no_match}
@@ -448,14 +464,6 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
         case 'O': e("O̊") case 'U': e("Ů")
         case 'a': e("å") case 'e': e("e̊") case 'i': e("i̊")
         case 'o': e("o̊") case 'u': e("ů")
-        default: no_match}
-    case ',': switch (k) { // cedilla
-        case 'C': e("Ç")
-        case 'c': e("ç")
-        default: no_match}
-    case '/': switch (k) {
-        case 'O': e("Ø")
-        case 'o': e("ø")
         default: no_match}
     }}
     fprintf(stderr, "LOL:UNFORESEEN\n");
