@@ -371,47 +371,91 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
     case 0: if (k == '\'') g else return IRV_TO_PROCESS;
     case 1: switch (k) {
         case '\'': e("'")
+        case '1': e("¡")
+        case '/': e("¿")
         case 'a': case 'c': case 'e': case 'i': case 'n': case 'o': case 'u': g
-        case 'h':  e("ʻ")
+        case 'h': e("ʻ")
         default: no_match}
     default: switch (store[1]) {
+    case '`': switch (k) { // tilde
+        case 'A': e("Ã") case 'E': e("Ẽ") case 'I': e("Ĩ") case 'N': e("Ñ")
+        case 'O': e("Õ") case 'U': e("Ũ")
+        case 'a': e("ã") case 'e': e("ẽ") case 'i': e("ĩ") case 'n': e("ñ")
+        case 'o': e("õ") case 'u': e("ũ")
+        default: no_match}
+    case '1': switch (k) { // macron
+        case 'A': e("Ā") case 'E': e("Ē") case 'I': e("Ī")
+        case 'O': e("Ō") case 'U': e("Ū")
+        case 'a': e("ā") case 'e': e("ē") case 'i': e("ī")
+        case 'o': e("ō") case 'u': e("ū")
+        default: no_match}
+    case '2': switch (k) { // acute
+        case 'A': e("Á") case 'E': e("É") case 'I': e("Í")
+        case 'O': e("Ó") case 'U': e("Ú")
+        case 'a': e("á") case 'e': e("é") case 'i': e("í")
+        case 'o': e("ó") case 'u': e("ú")
+        default: no_match}
+    case '3': switch (k) { // caron (aka háček)
+        case 'A': e("Ǎ") case 'E': e("Ě") case 'I': e("Ǐ")
+        case 'O': e("Ǒ") case 'U': e("Ǔ")
+        case 'a': e("ǎ") case 'e': e("ě") case 'i': e("ǐ")
+        case 'o': e("ǒ") case 'u': e("ǔ")
+        default: no_match}
+    case '4': switch (k) { // grave
+        case 'A': e("À") case 'E': e("È") case 'I': e("Ì")
+        case 'O': e("Ò") case 'U': e("Ù")
+        case 'a': e("à") case 'e': e("è") case 'i': e("ì")
+        case 'o': e("ò") case 'u': e("ù")
+        default: no_match}
+    case '5': switch (k) { // overdot
+        case 'A': e("Ȧ") case 'E': e("Ė") case 'I': e("İ")
+        case 'O': e("Ȯ") case 'U': e("U̇")
+        case 'a': e("ȧ") case 'e': e("ė") case 'i': e("i")
+        case 'o': e("ȯ") case 'u': e("u̇")
+        default: no_match}
+    case '.': switch (k) { // underdot
+        case 'A': e("Ạ") case 'E': e("Ė") case 'I': e("Ị")
+        case 'O': e("Ọ") case 'U': e("U̇")
+        case 'a': e("ạ") case 'e': e("ė") case 'i': e("ị")
+        case 'o': e("ọ") case 'u': e("u̇")
+        default: no_match}
+    case '6': switch (k) { // circumflex
+        case 'A': e("Â") case 'E': e("Ê") case 'I': e("Î")
+        case 'O': e("Ô") case 'U': e("Û")
+        case 'a': e("â") case 'e': e("ê") case 'i': e("î")
+        case 'o': e("ô") case 'u': e("û")
+        default: no_match}
+    case '9': switch (k) { // breve
+        case 'A': e("Ă") case 'E': e("Ĕ") case 'I': e("Ĭ")
+        case 'O': e("Ŏ") case 'U': e("Ŭ")
+        case 'a': e("ă") case 'e': e("ĕ") case 'i': e("ĭ")
+        case 'o': e("ŏ") case 'u': e("ŭ")
+        default: no_match}
+    case ';': switch (k) { // umlaut (aka diaresis)
+        case 'A': e("Ä") case 'E': e("Ë") case 'I': e("Ï")
+        case 'O': e("Ö") case 'U': e("Ü")
+        case 'a': e("ä") case 'e': e("ë") case 'i': e("ï")
+        case 'o': e("ö") case 'u': e("ü")
+        default: no_match}
+    case 'A': switch (k) {
+        case 'E': e("Æ")
+        default: no_match}
     case 'a': switch (k) {
-        case '-':  e("ā")
-        case '/':  e("á")
-        case '\\': e("à")
-        case '6':  e("â")
-        case '`':  e("ã")
-        case ';':  e("ä")
-        case 'o':  e("å")
-        case 'e':  e("æ")
+        case 'e': e("æ")
         default: no_match}
-    case 'c': switch (k) {
-        case ',':  e("ç")
+    case 'o': switch (k) { // ring
+        case 'A': e("Å") case 'E': e("E̊") case 'I': e("I̊")
+        case 'O': e("O̊") case 'U': e("Ů")
+        case 'a': e("å") case 'e': e("e̊") case 'i': e("i̊")
+        case 'o': e("o̊") case 'u': e("ů")
         default: no_match}
-    case 'e': switch (k) {
-        case '-':  e("ē")
-        case '/':  e("é")
-        case '\\': e("è")
-        case '6':  e("ê")
-        case ';':  e("ë")
+    case ',': switch (k) { // cedilla
+        case 'C': e("Ç")
+        case 'c': e("ç")
         default: no_match}
-    case 'i': switch (k) {
-        case '-':  e("ī")
-        case '/':  e("í")
-        case '\\': e("ì")
-        case '6':  e("î")
-        case ';':  e("ï")
-        default: no_match}
-    case 'n': switch (k) {
-        case '`':  e("ñ")
-        default: no_match}
-    case 'o': switch (k) {
-        case '`':  e("ō")
-        case '/':  e("ó")
-        case '\\': e("ò")
-        case '6':  e("ô")
-        case ';':  e("ö")
-        case '1':  e("ø")
+    case '/': switch (k) {
+        case 'O': e("Ø")
+        case 'o': e("ø")
         default: no_match}
     }}
     fprintf(stderr, "LOL:UNFORESEEN\n");
