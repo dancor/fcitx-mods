@@ -349,67 +349,73 @@ boolean TableCheckNoMatch(TableMetaData* table, const char* code)
 int store_n = 0;
 char store[4];
 
-void c(void *a, char *s) {
+inline void c(void *a, char *s) {
     TableMetaData* table = (TableMetaData*)a;
     FcitxTableState *tbl = table->owner;
     FcitxInstance *i = tbl->owner;
     FcitxInstanceCommitString(i, FcitxInstanceGetCurrentIC(i), s);
 }
 
-INPUT_RETURN_VALUE DoTableInput(void* a, FcitxKeySym k, unsigned int state)
+// End a code:
+#define e(s) c(arg,s); store_n = 0; return IRV_DO_NOTHING;
+// Grow a code that isn't ended yet:
+#define g {store[store_n++] = k; return IRV_DO_NOTHING;}
+// Abort a code:
+#define no_match store[store_n] = 0; c(arg,store); store_n = 0; return IRV_TO_PROCESS;
+
+INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
 {
     fprintf(stderr, "LOL:DoTableInput %d\t%d\t%d\n", k, store_n, store[0]);
     if (FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
     switch (store_n) {
-    case 0: if (k == '\'') {store[store_n++] = k; return IRV_DO_NOTHING;}
-        return IRV_TO_PROCESS;
+    case 0: if (k == '\'') g else return IRV_TO_PROCESS;
     case 1: switch (k) {
-        case '\'': store_n = 0; return IRV_TO_PROCESS;
-        case 'a': case 'c': case 'e': case 'i': case 'n': case 'o': case 'u':
-            store[store_n++] = k; return IRV_DO_NOTHING;
-        case 'h': c(a,"ʻ"); store_n = 0; return IRV_DO_NOTHING;
-        } c(a,"'"); store_n = 0; return IRV_TO_PROCESS;
-    } store_n = 0; switch (store[1]) {
+        case '\'': e("'")
+        case 'a': case 'c': case 'e': case 'i': case 'n': case 'o': case 'u': g
+        case 'h':  e("ʻ")
+        default: no_match}
+    default: switch (store[1]) {
     case 'a': switch (k) {
-        case '-':  c(a,"ā"); return IRV_DO_NOTHING;
-        case '/':  c(a,"á"); return IRV_DO_NOTHING;
-        case '\\': c(a,"à"); return IRV_DO_NOTHING;
-        case '^':  c(a,"â"); return IRV_DO_NOTHING;
-        case '~':  c(a,"ã"); return IRV_DO_NOTHING;
-        case ':':  c(a,"ä"); return IRV_DO_NOTHING;
-        case 'o':  c(a,"å"); return IRV_DO_NOTHING;
-        case 'e':  c(a,"æ"); return IRV_DO_NOTHING;
-        } c(a,"'a"); return IRV_TO_PROCESS;
+        case '-':  e("ā")
+        case '/':  e("á")
+        case '\\': e("à")
+        case '6':  e("â")
+        case '`':  e("ã")
+        case ';':  e("ä")
+        case 'o':  e("å")
+        case 'e':  e("æ")
+        default: no_match}
     case 'c': switch (k) {
-        case ',': c(a,"ç"); return IRV_DO_NOTHING;
-        } c(a,"'c"); return IRV_TO_PROCESS;
+        case ',':  e("ç")
+        default: no_match}
     case 'e': switch (k) {
-        case '-':  c(a,"ē"); return IRV_DO_NOTHING;
-        case '/':  c(a,"é"); return IRV_DO_NOTHING;
-        case '\\': c(a,"è"); return IRV_DO_NOTHING;
-        case '^':  c(a,"ê"); return IRV_DO_NOTHING;
-        case ':':  c(a,"ë"); return IRV_DO_NOTHING;
-        } c(a,"'e"); return IRV_TO_PROCESS;
+        case '-':  e("ē")
+        case '/':  e("é")
+        case '\\': e("è")
+        case '6':  e("ê")
+        case ';':  e("ë")
+        default: no_match}
     case 'i': switch (k) {
-        case '-':  c(a,"ī"); return IRV_DO_NOTHING;
-        case '/':  c(a,"í"); return IRV_DO_NOTHING;
-        case '\\': c(a,"ì"); return IRV_DO_NOTHING;
-        case '^':  c(a,"î"); return IRV_DO_NOTHING;
-        case ':':  c(a,"ï"); return IRV_DO_NOTHING;
-        } c(a,"'i"); return IRV_TO_PROCESS;
+        case '-':  e("ī")
+        case '/':  e("í")
+        case '\\': e("ì")
+        case '6':  e("î")
+        case ';':  e("ï")
+        default: no_match}
     case 'n': switch (k) {
-        case '~': c(a,"ñ"); return IRV_DO_NOTHING;
-        } c(a,"'n"); return IRV_TO_PROCESS;
+        case '`':  e("ñ")
+        default: no_match}
     case 'o': switch (k) {
-        case '-':  c(a,"ō"); return IRV_DO_NOTHING;
-        case '/':  c(a,"ó"); return IRV_DO_NOTHING;
-        case '\\': c(a,"ò"); return IRV_DO_NOTHING;
-        case '^':  c(a,"ô"); return IRV_DO_NOTHING;
-        case ':':  c(a,"ö"); return IRV_DO_NOTHING;
-        case '!':  c(a,"ø"); return IRV_DO_NOTHING;
-        } c(a,"'o"); return IRV_TO_PROCESS;
-    }
+        case '`':  e("ō")
+        case '/':  e("ó")
+        case '\\': e("ò")
+        case '6':  e("ô")
+        case ';':  e("ö")
+        case '1':  e("ø")
+        default: no_match}
+    }}
     fprintf(stderr, "LOL:UNFORESEEN\n");
+    return IRV_TO_PROCESS;
 
     /*
     FcitxInputState *input = FcitxInstanceGetInputState(instance);
