@@ -86,7 +86,6 @@ static inline unsigned int GetTableMod(TableMetaData* table)
 
 boolean LoadTableConfig(TableConfig* config)
 {
-    fputs("LOL:LoadTableConfig\n", stderr);
     FcitxConfigFileDesc* configDesc = GetTableGlobalConfigDesc();
     if (configDesc == NULL)
         return false;
@@ -347,12 +346,52 @@ boolean TableCheckNoMatch(TableMetaData* table, const char* code)
     }
 }
 
-INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
-{
-    TableMetaData* table = (TableMetaData*) arg;
+int store_n = 0;
+char store[4];
+
+void c(void *a, char *s) {
+    TableMetaData* table = (TableMetaData*)a;
     FcitxTableState *tbl = table->owner;
-    INPUT_RETURN_VALUE retVal;
-    FcitxInstance *instance = tbl->owner;
+    FcitxInstance *i = tbl->owner;
+    FcitxInstanceCommitString(i, FcitxInstanceGetCurrentIC(i), s);
+}
+
+INPUT_RETURN_VALUE DoTableInput(void* a, FcitxKeySym k, unsigned int state)
+{
+    fprintf(stderr, "LOL:DoTableInput %d\t%d\t%d\n", k, store_n, store[0]);
+    if (FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
+    if (store_n == 0) {
+        if (k == '\'') {
+            store[store_n++] = k;
+            return IRV_DO_NOTHING;
+        }
+    } else if (store_n == 1) {
+        if (k == '\'') {
+            store_n = 0;
+            return IRV_TO_PROCESS;
+        } else if (k == 'a') store[store_n++] = k;
+          else if (k == 'h') {
+            c(a,"ʻ");
+            store_n = 0;
+        } else {
+            c(a,"'");
+            store_n = 0;
+            return IRV_TO_PROCESS;
+        }
+        return IRV_DO_NOTHING;
+    } else {
+        store_n = 0;
+             if (k == '-') c(a,"ā");
+        else if (k == '/') c(a,"á");
+        else {
+            c(a,"'a");
+            return IRV_TO_PROCESS;
+        }
+        return IRV_DO_NOTHING;
+    }
+    return IRV_TO_PROCESS;
+
+    /*
     FcitxInputState *input = FcitxInstanceGetInputState(instance);
     FcitxGlobalConfig* config = FcitxInstanceGetGlobalConfig(instance);
     char* strCodeInput = FcitxInputStateGetRawInputBuffer(input);
@@ -372,30 +411,41 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
         tbl->curLoadedTable = NULL;
     }
 
+    fprintf(stderr, "LOL:Got1\n");
     if (tbl->curLoadedTable == NULL) {
         if (!LoadTableDict(table)) {
             FcitxInstanceUnregisterIM(instance, TableMetaDataGetName(table));
             FcitxInstanceUpdateIMList(instance);
+            fprintf(stderr, "LOL:ret1\n");
             return IRV_DONOT_PROCESS;
         }
         tbl->curLoadedTable = table;
     }
 
-    if (FcitxHotkeyIsHotKeyModifierCombine(sym, state))
+    fprintf(stderr, "LOL:Got2\n");
+    if (FcitxHotkeyIsHotKeyModifierCombine(sym, state)) {
+        fprintf(stderr, "LOL:ret2\n");
         return IRV_TO_PROCESS;
+    }
+    // returning here didn't break anything!
 
+    fprintf(stderr, "LOL:Got3\n");
     if (tbl->bTablePhraseTips) {
         if (FcitxHotkeyIsHotKey(sym, state, FCITX_CTRL_DELETE)) {
             tbl->bTablePhraseTips = false;
             TableDelPhraseByHZ(table->tableDict, FcitxMessagesGetMessageString(FcitxInputStateGetAuxUp(input), 1));
+            fprintf(stderr, "LOL:ret3\n");
             return IRV_CLEAN;
         } else if (state == FcitxKeyState_None && (sym != FcitxKey_Control_L && sym != FcitxKey_Control_R && sym != FcitxKey_Shift_L && sym != FcitxKey_Shift_R)) {
             FcitxInstanceCleanInputWindow(instance);
             tbl->bTablePhraseTips = false;
+    fprintf(stderr, "LOL:Got4\n");
             FcitxUICloseInputWindow(instance);
+    fprintf(stderr, "LOL:Got5\n");
         }
     }
 
+    fprintf(stderr, "LOL:Got6\n");
     retVal = IRV_DO_NOTHING;
     if (state == FcitxKeyState_None &&
         (IsInputKey(table->tableDict, sym)
@@ -409,7 +459,7 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
             FcitxCandidateWordReset(candList);
         FcitxInputStateSetIsInRemind(input, false);
 
-        /* it's not in special state */
+        // it's not in special state
         if (!tbl->bIsTableAddPhrase && !tbl->bIsTableDelPhrase &&
             !tbl->bIsTableAdjustOrder && !tbl->bIsTableClearFreq) {
             size_t raw_size = FcitxInputStateGetRawInputBufferSize(input);
@@ -422,11 +472,13 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
                 memcpy(buf, strCodeInput, len);
                 buf[len] = (char)sym;
                 buf[len + 1] = '\0';
-                if (TableFindFirstMatchCode(table, buf, false, false) == -1)
+                if (TableFindFirstMatchCode(table, buf, false, false) == -1) {
+                    fprintf(stderr, "LOL:ret4\n");
                     return IRV_TO_PROCESS;
+                }
             }
 
-            /* check we use Pinyin or Not */
+            // check we use Pinyin or Not
             if (strCodeInput[0] == table->cPinyin && table->bUsePY) {
                 if (raw_size != (MAX_PY_LENGTH * 5 + 1)) {
                     strCodeInput[raw_size] = (char) sym;
@@ -438,7 +490,7 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
                     retVal = IRV_DO_NOTHING;
                 }
             } else {
-                /* length is not too large */
+                // length is not too large
                 if (((raw_size < table->tableDict->iCodeLength) ||
                      (table->tableDict->bHasPinyin &&
                       raw_size < table->tableDict->iPYCodeLength) ||
@@ -483,19 +535,24 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
                             FcitxPuncGetPunc2(instance, &key, &strTemp, NULL);
                         }
                         if (IsEndKey(table, sym)) {
-                            if (raw_size == 1)
+                            if (raw_size == 1) {
+                                fprintf(stderr, "LOL:ret5\n");
                                 return IRV_TO_PROCESS;
+                            }
 
                             if (FcitxCandidateWordPageCount(candList) == 0) {
                                 FcitxInputStateSetRawInputBufferSize(input, 0);
+        fprintf(stderr, "LOL:ret6\n");
                                 return IRV_CLEAN;
                             }
 
                             if (FcitxCandidateWordGetCurrentWindowSize(candList) == 1) {
                                 retVal = FcitxCandidateWordChooseByIndex(candList, 0);
+                                fprintf(stderr, "LOL:retVal1 %d\n", retVal);
                                 return retVal;
                             }
 
+        fprintf(stderr, "LOL:ret8\n");
                             return IRV_DISPLAY_CANDWORDS;
                         } else if (table->bUseAutoSend
                                    && table->iTableAutoSendToClientWhenNone
@@ -514,14 +571,13 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
                             strCodeInput[1] = '\0';
                         } else if ((raw_size == 1) && strTemp &&
                                    FcitxCandidateWordPageCount(candList) == 0) {
-                            /**
-                             * 如果第一个字母是标点，并且没有候选字/词
-                             * 则当做标点处理──适用于二笔这样的输入
-                             **/
+                            // 如果第一个字母是标点，并且没有候选字/词
+                            // 则当做标点处理──适用于二笔这样的输入
                             FcitxInstanceCleanInputWindow(instance);
                             FcitxInputStateGetRawInputBuffer(input)[0] = '\0';
                             FcitxInputStateSetRawInputBufferSize(input, 0);
                             TableResetStatus(table);
+        fprintf(stderr, "LOL:ret9\n");
                             return IRV_TO_PROCESS;
                         }
                     }
@@ -572,19 +628,24 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
                     TableInsertPhrase(table->tableDict, FcitxMessagesGetMessageString(msg_down, 1), FcitxMessagesGetMessageString(msg_down, 0));
                 tbl->bIsTableAddPhrase = false;
                 FcitxInputStateSetIsDoInputOnly(input, false);
+        fprintf(stderr, "LOL:ret10\n");
                 return IRV_CLEAN;
             } else if (FcitxHotkeyIsHotKey(sym, state, FCITX_ESCAPE)) {
                 tbl->bIsTableAddPhrase = false;
                 FcitxInputStateSetIsDoInputOnly(input, false);
+        fprintf(stderr, "LOL:ret11\n");
                 return IRV_CLEAN;
             } else {
+        fprintf(stderr, "LOL:ret12\n");
                 return IRV_DO_NOTHING;
             }
+        fprintf(stderr, "LOL:ret13\n");
             return IRV_DISPLAY_MESSAGE;
         }
         if (FcitxHotkeyIsHotKey(sym, state, tbl->config.hkTableAddPhrase)) {
             if (!tbl->bIsTableAddPhrase) {
                 if (table->tableDict->iHZLastInputCount < 2 || !table->tableDict->bRule) //词组最少为两个汉字
+        fprintf(stderr, "LOL:ret14\n");
                     return IRV_DO_NOTHING;
 
                 tbl->bTablePhraseTips = false;
@@ -604,13 +665,16 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
             } else
                 retVal = IRV_TO_PROCESS;
 
+            fprintf(stderr, "LOL:retVal2 %d\n", retVal);
             return retVal;
         } else if (FcitxHotkeyIsHotKey(sym, state, tbl->config.hkLookupPinyin) && tbl->pyaddon) {
             char strPY[128];
 
             //如果刚刚输入的是个词组，刚不查拼音
-            if (fcitx_utf8_strlen(output_str) != 1)
+            if (fcitx_utf8_strlen(output_str) != 1) {
+        fprintf(stderr, "LOL:ret15\n");
                 return IRV_DO_NOTHING;
+            }
 
             FcitxInputStateSetRawInputBufferSize(input, 0);
 
@@ -646,11 +710,14 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
                 (strPY[0]) ? strPY : _("Cannot found Pinyin"));
             FcitxInputStateSetShowCursor(input, false);
 
+        fprintf(stderr, "LOL:ret16\n");
             return IRV_DISPLAY_MESSAGE;
         }
 
-        if (!FcitxInputStateGetRawInputBufferSize(input) && !FcitxInputStateGetIsInRemind(input))
+        if (!FcitxInputStateGetRawInputBufferSize(input) && !FcitxInputStateGetIsInRemind(input)) {
+        fprintf(stderr, "LOL:ret17\n");
             return IRV_TO_PROCESS;
+        }
 
         if (FcitxHotkeyIsHotKey(sym, state, FCITX_ESCAPE)) {
             if (tbl->bIsTableDelPhrase || tbl->bIsTableAdjustOrder || tbl->bIsTableClearFreq) {
@@ -664,18 +731,23 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
                     MSG_INPUT | MSG_DONOT_COMMIT_WHEN_UNFOCUS,
                     FcitxInputStateGetRawInputBuffer(input));
                 retVal = IRV_DISPLAY_CANDWORDS;
-            } else
+            } else {
+        fprintf(stderr, "LOL:ret18\n");
                 return IRV_CLEAN;
+            }
         } else if (FcitxHotkeyCheckChooseKey(sym, state, table->strChoose) >= 0) {
             int iKey;
             iKey = FcitxHotkeyCheckChooseKey(sym, state, table->strChoose);
 
-            if (FcitxCandidateWordPageCount(candList) == 0)
+            if (FcitxCandidateWordPageCount(candList) == 0) {
+        fprintf(stderr, "LOL:ret19\n");
                 return IRV_TO_PROCESS;
+            }
 
-            if (FcitxCandidateWordGetByIndex(candList, iKey) == NULL)
+            if (FcitxCandidateWordGetByIndex(candList, iKey) == NULL) {
+        fprintf(stderr, "LOL:ret20\n");
                 return IRV_DO_NOTHING;
-            else {
+            } else {
                 FcitxCandidateWord* candWord = FcitxCandidateWordGetByIndex(candList, iKey);
                 if (candWord->owner == table && tbl->bIsTableDelPhrase) {
                     TableDelPhraseByIndex(table, candWord->priv);
@@ -692,30 +764,37 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
                     tbl->bIsTableClearFreq = false;
                     FcitxInputStateSetIsDoInputOnly(input, false);
                     retVal = IRV_DISPLAY_CANDWORDS;
-                }
-                else
+                } else {
+        fprintf(stderr, "LOL:ret21\n");
                     return IRV_TO_PROCESS;
+                }
             }
         } else if (!tbl->bIsTableDelPhrase && !tbl->bIsTableAdjustOrder && !tbl->bIsTableClearFreq) {
             if (FcitxHotkeyIsHotKey(sym, state, tbl->config.hkTableAdjustOrder)) {
-                if (FcitxCandidateWordGetListSize(candList) < 2 || FcitxInputStateGetIsInRemind(input))
+                if (FcitxCandidateWordGetListSize(candList) < 2 || FcitxInputStateGetIsInRemind(input)) {
+        fprintf(stderr, "LOL:ret22\n");
                     return IRV_DO_NOTHING;
+                }
 
                 tbl->bIsTableAdjustOrder = true;
                 FcitxInstanceCleanInputWindowUp(instance);
                 FcitxMessagesAddMessageStringsAtLast(FcitxInputStateGetAuxUp(input), MSG_TIPS, _("Choose the phrase to be put in the front, Press Escape to Cancel"));
                 retVal = IRV_DISPLAY_MESSAGE;
             } else if (FcitxHotkeyIsHotKey(sym, state, tbl->config.hkTableDelPhrase)) {
-                if (!FcitxCandidateWordPageCount(candList) || FcitxInputStateGetIsInRemind(input))
+                if (!FcitxCandidateWordPageCount(candList) || FcitxInputStateGetIsInRemind(input)) {
+        fprintf(stderr, "LOL:ret23\n");
                     return IRV_DO_NOTHING;
+                }
 
                 tbl->bIsTableDelPhrase = true;
                 FcitxInstanceCleanInputWindowUp(instance);
                 FcitxMessagesAddMessageStringsAtLast(FcitxInputStateGetAuxUp(input), MSG_TIPS, _("Choose the phrase to be deleted, Press Escape to Cancel"));
                 retVal = IRV_DISPLAY_MESSAGE;
             } else if (FcitxHotkeyIsHotKey(sym, state, tbl->config.hkTableClearFreq)) {
-                if (!FcitxCandidateWordPageCount(candList) || FcitxInputStateGetIsInRemind(input))
+                if (!FcitxCandidateWordPageCount(candList) || FcitxInputStateGetIsInRemind(input)) {
+        fprintf(stderr, "LOL:ret24\n");
                     return IRV_DO_NOTHING;
+                }
 
                 tbl->bIsTableClearFreq = true;
                 FcitxInstanceCleanInputWindowUp(instance);
@@ -724,6 +803,7 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
             } else if (FcitxHotkeyIsHotKey(sym, state, FCITX_BACKSPACE)) {
                 if (!FcitxInputStateGetRawInputBufferSize(input)) {
                     FcitxInputStateSetIsInRemind(input, false);
+        fprintf(stderr, "LOL:ret25\n");
                     return IRV_DONOT_PROCESS_CLEAN;
                 }
 
@@ -757,6 +837,7 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
                     }
                 }
             } else {
+        fprintf(stderr, "LOL:ret26\n");
                 return IRV_TO_PROCESS;
             }
         }
@@ -775,7 +856,9 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym sym, unsigned int state)
         FcitxInputStateSetClientCursorPos(input, 0);
     }
 
+    fprintf(stderr, "LOL:RetVal3 %d\n", retVal);
     return retVal;
+    */
 }
 
 INPUT_RETURN_VALUE TableGetCandWord(void* arg, FcitxCandidateWord* candWord)

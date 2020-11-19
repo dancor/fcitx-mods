@@ -244,6 +244,7 @@ void XIMProcessKey(FcitxXimFrontend* xim, IMForwardEventStruct * call_data)
     FcitxInputStateSetKeyCode(input, kev->keycode);
     FcitxInputStateSetKeySym(input, originsym);
     FcitxInputStateSetKeyState(input, originstate);
+    fprintf(stderr, "LOL:XIM:FcitxInstanceProcessKey\n");
     INPUT_RETURN_VALUE retVal = FcitxInstanceProcessKey(xim->owner, type,
                                            kev->time,
                                            sym, state);

@@ -700,6 +700,7 @@ static gboolean fcitx_im_context_filter_keypress(GtkIMContext *context,
 static void _fcitx_im_context_process_key_cb(GObject *source_object,
                                              GAsyncResult *res,
                                              gpointer user_data) {
+    fprintf(stderr,"LOL:_fcitx_im_context_process_key_cb");
     GdkEventKey *event = user_data;
     int ret = fcitx_client_process_key_finish(FCITX_CLIENT(source_object), res);
     if (ret <= 0) {
