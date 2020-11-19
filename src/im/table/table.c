@@ -360,36 +360,56 @@ INPUT_RETURN_VALUE DoTableInput(void* a, FcitxKeySym k, unsigned int state)
 {
     fprintf(stderr, "LOL:DoTableInput %d\t%d\t%d\n", k, store_n, store[0]);
     if (FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
-    if (store_n == 0) {
-        if (k == '\'') {
-            store[store_n++] = k;
-            return IRV_DO_NOTHING;
-        }
-    } else if (store_n == 1) {
-        if (k == '\'') {
-            store_n = 0;
-            return IRV_TO_PROCESS;
-        } else if (k == 'a') store[store_n++] = k;
-          else if (k == 'h') {
-            c(a,"ʻ");
-            store_n = 0;
-        } else {
-            c(a,"'");
-            store_n = 0;
-            return IRV_TO_PROCESS;
-        }
-        return IRV_DO_NOTHING;
-    } else {
-        store_n = 0;
-             if (k == '-') c(a,"ā");
-        else if (k == '/') c(a,"á");
-        else {
-            c(a,"'a");
-            return IRV_TO_PROCESS;
-        }
-        return IRV_DO_NOTHING;
+    switch (store_n) {
+    case 0: if (k == '\'') {store[store_n++] = k; return IRV_DO_NOTHING;}
+        return IRV_TO_PROCESS;
+    case 1: switch (k) {
+        case '\'': store_n = 0; return IRV_TO_PROCESS;
+        case 'a': case 'c': case 'e': case 'i': case 'n': case 'o': case 'u':
+            store[store_n++] = k; return IRV_DO_NOTHING;
+        case 'h': c(a,"ʻ"); store_n = 0; return IRV_DO_NOTHING;
+        } c(a,"'"); store_n = 0; return IRV_TO_PROCESS;
+    } store_n = 0; switch (store[1]) {
+    case 'a': switch (k) {
+        case '-':  c(a,"ā"); return IRV_DO_NOTHING;
+        case '/':  c(a,"á"); return IRV_DO_NOTHING;
+        case '\\': c(a,"à"); return IRV_DO_NOTHING;
+        case '^':  c(a,"â"); return IRV_DO_NOTHING;
+        case '~':  c(a,"ã"); return IRV_DO_NOTHING;
+        case ':':  c(a,"ä"); return IRV_DO_NOTHING;
+        case 'o':  c(a,"å"); return IRV_DO_NOTHING;
+        case 'e':  c(a,"æ"); return IRV_DO_NOTHING;
+        } c(a,"'a"); return IRV_TO_PROCESS;
+    case 'c': switch (k) {
+        case ',': c(a,"ç"); return IRV_DO_NOTHING;
+        } c(a,"'c"); return IRV_TO_PROCESS;
+    case 'e': switch (k) {
+        case '-':  c(a,"ē"); return IRV_DO_NOTHING;
+        case '/':  c(a,"é"); return IRV_DO_NOTHING;
+        case '\\': c(a,"è"); return IRV_DO_NOTHING;
+        case '^':  c(a,"ê"); return IRV_DO_NOTHING;
+        case ':':  c(a,"ë"); return IRV_DO_NOTHING;
+        } c(a,"'e"); return IRV_TO_PROCESS;
+    case 'i': switch (k) {
+        case '-':  c(a,"ī"); return IRV_DO_NOTHING;
+        case '/':  c(a,"í"); return IRV_DO_NOTHING;
+        case '\\': c(a,"ì"); return IRV_DO_NOTHING;
+        case '^':  c(a,"î"); return IRV_DO_NOTHING;
+        case ':':  c(a,"ï"); return IRV_DO_NOTHING;
+        } c(a,"'i"); return IRV_TO_PROCESS;
+    case 'n': switch (k) {
+        case '~': c(a,"ñ"); return IRV_DO_NOTHING;
+        } c(a,"'n"); return IRV_TO_PROCESS;
+    case 'o': switch (k) {
+        case '-':  c(a,"ō"); return IRV_DO_NOTHING;
+        case '/':  c(a,"ó"); return IRV_DO_NOTHING;
+        case '\\': c(a,"ò"); return IRV_DO_NOTHING;
+        case '^':  c(a,"ô"); return IRV_DO_NOTHING;
+        case ':':  c(a,"ö"); return IRV_DO_NOTHING;
+        case '!':  c(a,"ø"); return IRV_DO_NOTHING;
+        } c(a,"'o"); return IRV_TO_PROCESS;
     }
-    return IRV_TO_PROCESS;
+    fprintf(stderr, "LOL:UNFORESEEN\n");
 
     /*
     FcitxInputState *input = FcitxInstanceGetInputState(instance);

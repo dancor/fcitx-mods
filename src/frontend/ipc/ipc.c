@@ -959,7 +959,7 @@ static int IPCProcessKey(FcitxIPCFrontend* ipc, FcitxInputContext* callic, const
     FcitxInputStateSetKeyCode(input, keycode);
     FcitxInputStateSetKeySym(input, originsym);
     FcitxInputStateSetKeyState(input, originstate);
-    fprintf(stderr, "LOL:IPC:FcitxInstanceProcessKey\n");
+    //fprintf(stderr, "LOL:IPC:FcitxInstanceProcessKey\n");
     INPUT_RETURN_VALUE retVal = FcitxInstanceProcessKey(ipc->owner, type,
                                            t,
                                            sym, state);

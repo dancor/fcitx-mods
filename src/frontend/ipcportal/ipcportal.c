@@ -576,7 +576,7 @@ static int PortalProcessKey(FcitxPortalFrontend* ipc, FcitxInputContext* callic,
     FcitxInputStateSetKeyCode(input, keycode);
     FcitxInputStateSetKeySym(input, originsym);
     FcitxInputStateSetKeyState(input, originstate);
-    fprintf(stderr, "LOL:IPCPortal:FcitxInstanceProcessKey\n");
+    //fprintf(stderr, "LOL:IPCPortal:FcitxInstanceProcessKey\n");
     INPUT_RETURN_VALUE retVal = FcitxInstanceProcessKey(ipc->owner, type,
                                            t,
                                            sym, state);
