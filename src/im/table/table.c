@@ -394,7 +394,8 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
         default: no_match}
     case 1: switch(store[0]) {
         case lshift: case rshift:
-            if (k >= 'a' && k <= 'z') e(k + 'A' - 'a'); else no_match
+            if (k >= 'a' && k <= 'z') {char s[2] = {k + 'A' - 'a', 0}; e(s)}
+            else no_match
         case '\'': switch (k) {
             case '\'': e("'")
             case 'C': e("Ç")
