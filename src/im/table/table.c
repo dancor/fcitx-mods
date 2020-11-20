@@ -393,9 +393,8 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
     case 0: switch (k) {case '\'': case lshift: case rshift: g
         default: no_match}
     case 1: switch(store[0]) {
-        case lshift: case rshift: switch (k) {
-            case 'a': e("A")
-            default: no_match}
+        case lshift: case rshift:
+            if (k >= 'a' && k <= 'z') e(k + 'A' - 'a'); else no_match
         case '\'': switch (k) {
             case '\'': e("'")
             case 'C': e("Ç")
@@ -407,7 +406,8 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
             case '.': case '6': case '9': case ';': case ',': case '/':
             case 'A': case 'a': case 'o': g
             default: no_match}
-        default: fprintf(stderr, "LOL:DoTableInput:case1ERROR\n"); return IRV_TO_PROCESS;}
+        default: fprintf(stderr, "LOL:DoTableInput:case1ERROR\n");
+            return IRV_TO_PROCESS;}
     default: switch (store[1]) {
     case 'n': switch (k) { // tilde
         case 'A': e("Ã") case 'E': e("Ẽ") case 'I': e("Ĩ") case 'N': e("Ñ")
