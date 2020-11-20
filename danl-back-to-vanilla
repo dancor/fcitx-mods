@@ -1,0 +1,2 @@
+#!/bin/sh
+so cp danl-orig/*.so /usr/lib/x86_64-linux-gnu/fcitx/

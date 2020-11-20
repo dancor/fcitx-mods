@@ -1,0 +1,9 @@
+#!/bin/sh
+#set -e
+#cd build
+#make
+so rm /usr/lib/x86_64-linux-gnu/fcitx/fcitx-xim.so
+so ln -s /home/danl/p/fcitx/fcitx-4.2.9.7/build/src/frontend/xim/fcitx-xim.so /usr/lib/x86_64-linux-gnu/fcitx/
+so rm /usr/lib/x86_64-linux-gnu/fcitx/fcitx-table.so
+so ln -s /home/danl/p/fcitx/fcitx-4.2.9.7/build/src//im/table/fcitx-table.so /usr/lib/x86_64-linux-gnu/fcitx/
+#so cp src/frontend/xim/fcitx-xim.so /usr/lib/x86_64-linux-gnu/fcitx/
