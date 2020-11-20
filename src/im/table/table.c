@@ -386,7 +386,6 @@ inline INPUT_RETURN_VALUE cstore(void *a) {
 
 INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
 {
-    if (FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
     if (k != lshift && k != rshift && 
         FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
     fprintf(stderr, "LOL:DoTableInput %d\t%d\t%d\n", k, store_n, store[0]);
@@ -411,7 +410,7 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
             default: no_match}
         default: fprintf(stderr, "LOL:DoTableInput:case1ERROR\n"); return IRV_TO_PROCESS;}
     default: switch (store[1]) {
-    case '`': switch (k) { // tilde
+    case 'n': switch (k) { // tilde
         case 'A': e("Ã") case 'E': e("Ẽ") case 'I': e("Ĩ") case 'N': e("Ñ")
         case 'O': e("Õ") case 'U': e("Ũ")
         case 'a': e("ã") case 'e': e("ẽ") case 'i': e("ĩ") case 'n': e("ñ")
