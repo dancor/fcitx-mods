@@ -346,6 +346,7 @@ boolean TableCheckNoMatch(TableMetaData* table, const char* code)
     }
 }
 
+
 int store_n = 0;
 char store[4];
 
@@ -363,25 +364,36 @@ inline void c(void *a, char *s) {
 // Abort a code:
 #define no_match store[store_n] = 0; c(arg,store); store_n = 0; return IRV_TO_PROCESS;
 
+#define lshift 65505
+#define rshift 65506
+
 INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
 {
-    fprintf(stderr, "LOL:DoTableInput %d\t%d\t%d\n", k, store_n, store[0]);
     if (FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
-    // https://en.wikipedia.org/wiki/Diacritic
+    //if (k != lshift && k != rshift && 
+    //    FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
+    fprintf(stderr, "LOL:DoTableInput %d\t%d\t%d\n", k, store_n, store[0]);
     switch (store_n) {
-    case 0: if (k == '\'') g else return IRV_TO_PROCESS;
-    case 1: switch (k) {
-        case '\'': e("'")
-        case 'C': e("Ç")
-        case 'N': e("Ñ")
-        case 'c': e("ç")
-        case 'h': e("ʻ") // ʻokina (Hawaiʻi)
-        case 'n': e("ñ")
-        case ':': e("ː") // triangular colon (IPA long vowels)
-        case '`': case '1': case '2': case '3': case '4': case '5': case '.': 
-        case '6': case '9': case ';': case ',': case '/': case 'A': case 'a': 
-        case 'o': g
+    case 0: switch (k) {case '\'': case '1': g // case lshift: case rshift: g
         default: no_match}
+    case 1: switch(store[0]) {
+        // case lshift: case rshift: switch (k) {
+        case '1': switch (k) {
+            case 'a': e("A")
+            default: no_match}
+        case '\'': switch (k) {
+            case '\'': e("'")
+            case 'C': e("Ç")
+            case 'N': e("Ñ")
+            case 'c': e("ç")
+            case 'h': e("ʻ") // ʻokina (Hawaiʻi)
+            case 'n': e("ñ")
+            case ':': e("ː") // triangular colon (IPA long vowels)
+            case '`': case '1': case '2': case '3': case '4': case '5':
+            case '.': case '6': case '9': case ';': case ',': case '/':
+            case 'A': case 'a': case 'o': g
+            default: no_match}
+        default: fprintf(stderr, "LOL:DoTableInput:case1ERROR\n"); return IRV_TO_PROCESS;}
     default: switch (store[1]) {
     case '`': switch (k) { // tilde
         case 'A': e("Ã") case 'E': e("Ẽ") case 'I': e("Ĩ") case 'N': e("Ñ")
