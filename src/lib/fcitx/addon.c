@@ -126,7 +126,7 @@ FcitxAddon* FcitxAddonsLoadInternal(UT_array* addons, boolean reloadIM)
         for (i = len - 1; i >= 0; i--) {
             fcitx_utils_alloc_cat_str(paths[i], addonPath[len - i - 1],
                                       "/", string->name);
-            FcitxLog(DEBUG, "Load Addon Config File:%s", paths[i]);
+            FcitxLog(INFO, "Load Addon Config File:%s", paths[i]);
         }
         FcitxConfigFile* cfile = FcitxConfigParseMultiConfigFile(paths, len, FcitxAddonGetConfigDesc());
         if (cfile) {

@@ -182,6 +182,126 @@ void SetTrackPos(FcitxXimFrontend* xim, FcitxInputContext* ic, IMChangeICStruct 
         FcitxUIMoveInputWindow(xim->owner);
 }
 
+int stor_n = 0;
+char stor[4];
+
+inline void my_commit(FcitxInstance *inst, char *s) {
+    FcitxInstanceCommitString(inst, FcitxInstanceGetCurrentIC(inst), s);
+    //XimCommitString(inst, FcitxInstanceGetCurrentIC(inst), s);
+}
+
+// End a code:
+#define e(s) my_commit(inst,s); stor_n = 0; return IRV_DO_NOTHING;
+// Grow a code that isn't ended yet:
+#define g {fprintf(stderr, "GROWING\n"); stor[stor_n++] = k; return IRV_DO_NOTHING;}
+// Abort a code:
+#define no_match stor[stor_n] = 0; my_commit(inst,stor); stor_n = 0; return IRV_TO_PROCESS;
+
+INPUT_RETURN_VALUE my_process_key(FcitxInstance *inst, FcitxKeySym k) {
+    if (k > 65000) return IRV_TO_PROCESS; // Don't capture modifier keys.
+    // https://en.wikipedia.org/wiki/Diacritic
+    switch (stor_n) {
+    case 0: if (k == '\'') g else return IRV_TO_PROCESS;
+    case 1: switch (k) {
+        case '\'': e("'")
+        case 'C': e("Ç")
+        case 'N': e("Ñ")
+        case 'c': e("ç")
+        case 'h': e("ʻ") // ʻokina (Hawaiʻi)
+        case 'n': e("ñ")
+        case ':': e("ː") // triangular colon (IPA long vowels)
+        case '`': case '1': case '2': case '3': case '4': case '5': case '.': 
+        case '6': case '9': case ';': case ',': case '/': case 'A': case 'a': 
+        case 'o': g
+        default: no_match}
+    default: switch (stor[1]) {
+    case '`': switch (k) { // tilde
+        case 'A': e("Ã") case 'E': e("Ẽ") case 'I': e("Ĩ") case 'N': e("Ñ")
+        case 'O': e("Õ") case 'U': e("Ũ")
+        case 'a': e("ã") case 'e': e("ẽ") case 'i': e("ĩ") case 'n': e("ñ")
+        case 'o': e("õ") case 'u': e("ũ")
+        default: no_match}
+    case '1': switch (k) { // macron
+        case '1': e("¡")
+        case 'A': e("Ā") case 'E': e("Ē") case 'I': e("Ī")
+        case 'O': e("Ō") case 'U': e("Ū")
+        case 'a': e("ā") case 'e': e("ē") case 'i': e("ī")
+        case 'o': e("ō") case 'u': e("ū")
+        default: no_match}
+    case '2': switch (k) { // acute
+        case 'A': e("Á") case 'E': e("É") case 'I': e("Í")
+        case 'O': e("Ó") case 'U': e("Ú")
+        case 'a': e("á") case 'e': e("é") case 'i': e("í")
+        case 'o': e("ó") case 'u': e("ú")
+        default: no_match}
+    case '3': switch (k) { // caron (aka háček, wedge)
+        case 'A': e("Ǎ") case 'E': e("Ě") case 'I': e("Ǐ")
+        case 'O': e("Ǒ") case 'U': e("Ǔ")
+        case 'a': e("ǎ") case 'e': e("ě") case 'i': e("ǐ")
+        case 'o': e("ǒ") case 'u': e("ǔ")
+        default: no_match}
+    case '4': switch (k) { // grave
+        case 'A': e("À") case 'E': e("È") case 'I': e("Ì")
+        case 'O': e("Ò") case 'U': e("Ù")
+        case 'a': e("à") case 'e': e("è") case 'i': e("ì")
+        case 'o': e("ò") case 'u': e("ù")
+        default: no_match}
+    case '5': switch (k) { // overdot
+        case 'A': e("Ȧ") case 'E': e("Ė") case 'I': e("İ")
+        case 'O': e("Ȯ") case 'U': e("U̇")
+        case 'a': e("ȧ") case 'e': e("ė") case 'i': e("i")
+        case 'o': e("ȯ") case 'u': e("u̇")
+        default: no_match}
+    case '.': switch (k) { // underdot
+        case 'A': e("Ạ") case 'E': e("Ė") case 'I': e("Ị")
+        case 'O': e("Ọ") case 'U': e("U̇")
+        case 'a': e("ạ") case 'e': e("ė") case 'i': e("ị")
+        case 'o': e("ọ") case 'u': e("u̇")
+        default: no_match}
+    case '6': switch (k) { // circumflex
+        case 'A': e("Â") case 'E': e("Ê") case 'I': e("Î")
+        case 'O': e("Ô") case 'U': e("Û")
+        case 'a': e("â") case 'e': e("ê") case 'i': e("î")
+        case 'o': e("ô") case 'u': e("û")
+        default: no_match}
+    case '9': switch (k) { // breve
+        case 'A': e("Ă") case 'E': e("Ĕ") case 'I': e("Ĭ")
+        case 'O': e("Ŏ") case 'U': e("Ŭ")
+        case 'a': e("ă") case 'e': e("ĕ") case 'i': e("ĭ")
+        case 'o': e("ŏ") case 'u': e("ŭ")
+        default: no_match}
+    case ';': switch (k) { // umlaut (aka diaresis)
+        case 'A': e("Ä") case 'E': e("Ë") case 'I': e("Ï")
+        case 'O': e("Ö") case 'U': e("Ü")
+        case 'a': e("ä") case 'e': e("ë") case 'i': e("ï")
+        case 'o': e("ö") case 'u': e("ü")
+        default: no_match}
+    case ',': switch (k) { // cedilla
+        case 'C': e("Ç")
+        case 'c': e("ç")
+        default: no_match}
+    case '/': switch (k) {
+        case '/': e("¿")
+        case 'O': e("Ø")
+        case 'o': e("ø")
+        default: no_match}
+    case 'A': switch (k) {
+        case 'E': e("Æ")
+        default: no_match}
+    case 'a': switch (k) {
+        case 'e': e("æ")
+        default: no_match}
+    case 'o': switch (k) { // ring
+        case 'A': e("Å") case 'E': e("E̊") case 'I': e("I̊")
+        case 'O': e("O̊") case 'U': e("Ů")
+        case 'a': e("å") case 'e': e("e̊") case 'i': e("i̊")
+        case 'o': e("o̊") case 'u': e("ů")
+        default: no_match}
+    }}
+    fprintf(stderr, "LOL:UNFORESEEN\n");
+    return IRV_TO_PROCESS;
+}
+
 void XIMProcessKey(FcitxXimFrontend* xim, IMForwardEventStruct * call_data)
 {
     KeySym originsym;
@@ -244,7 +364,10 @@ void XIMProcessKey(FcitxXimFrontend* xim, IMForwardEventStruct * call_data)
     FcitxInputStateSetKeyCode(input, kev->keycode);
     FcitxInputStateSetKeySym(input, originsym);
     FcitxInputStateSetKeyState(input, originstate);
-    //fprintf(stderr, "LOL:XIM:FcitxInstanceProcessKey\n");
+    //fprintf(stderr, "LOL:XIM:FcitxInstanceProcessKey %d\n", sym);
+    /*
+    INPUT_RETURN_VALUE retVal = my_process_key(xim->owner, sym);
+                                           */
     INPUT_RETURN_VALUE retVal = FcitxInstanceProcessKey(xim->owner, type,
                                            kev->time,
                                            sym, state);

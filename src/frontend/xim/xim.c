@@ -379,6 +379,7 @@ void XimCloseIM(void* arg, FcitxInputContext* ic)
 
 void XimCommitString(void* arg, FcitxInputContext* ic, const char* str)
 {
+    //fprintf(stderr, "LOL:..XimCommitString %s\n", str);
     FcitxXimFrontend* xim = (FcitxXimFrontend*) arg;
     XTextProperty tp;
     FcitxXimIC* ximic = (FcitxXimIC*) ic->privateic;
@@ -401,6 +402,7 @@ void XimCommitString(void* arg, FcitxInputContext* ic, const char* str)
 
 void XimForwardKey(void *arg, FcitxInputContext* ic, FcitxKeyEventType event, FcitxKeySym sym, unsigned int state)
 {
+    //fprintf(stderr, "LOL:XimForwardKey %d\n", sym);
     FcitxXimFrontend* xim = (FcitxXimFrontend*) arg;
     Window win;
     if (!(win = GetXimIC(ic)->focus_win))
