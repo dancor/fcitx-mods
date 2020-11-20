@@ -2,4 +2,4 @@
 set -e
 cd build
 make
-fcitx -r
+fcitx -r 2> log &
