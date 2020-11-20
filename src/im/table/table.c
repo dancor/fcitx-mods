@@ -404,7 +404,7 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
             case 'h': e("ʻ") // ʻokina (Hawaiʻi)
             case 'n': e("ñ")
             case ':': e("ː") // triangular colon (IPA long vowels)
-            case '`': case '1': case '2': case '3': case '4': case '5':
+            case 'n': case '1': case '2': case '3': case '4': case '5':
             case '.': case '6': case '9': case ';': case ',': case '/':
             case 'A': case 'a': case 'o': g
             default: no_match}
