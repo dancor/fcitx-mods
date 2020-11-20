@@ -347,8 +347,9 @@ boolean TableCheckNoMatch(TableMetaData* table, const char* code)
 }
 
 
+#define store_max 4
 int store_n = 0;
-char store[4];
+int store[store_max];
 
 inline void c(void *a, char *s) {
     TableMetaData* table = (TableMetaData*)a;
@@ -356,13 +357,29 @@ inline void c(void *a, char *s) {
     FcitxInstance *i = tbl->owner;
     FcitxInstanceCommitString(i, FcitxInstanceGetCurrentIC(i), s);
 }
+inline INPUT_RETURN_VALUE cstore(void *a) {
+    store[store_n] = 0;
+    char s[store_max];
+    int store_i = 0;
+    int s_i = 0;
+    do {
+        if (store[store_i] == 0) break;
+        if (store[store_i] < 256) {
+            s[s_i++] = store[store_i];
+        }
+    } while (++store_i < store_max);
+    s[s_i] = 0;
+    c(a, s);
+    store_n = 0;
+    return IRV_TO_PROCESS;
+}
 
 // End a code:
-#define e(s) c(arg,s); store_n = 0; return IRV_DO_NOTHING;
+#define e(s) c(arg, s); store_n = 0; return IRV_DO_NOTHING;
 // Grow a code that isn't ended yet:
 #define g {store[store_n++] = k; return IRV_DO_NOTHING;}
 // Abort a code:
-#define no_match store[store_n] = 0; c(arg,store); store_n = 0; return IRV_TO_PROCESS;
+#define no_match return cstore(arg);
 
 #define lshift 65505
 #define rshift 65506
