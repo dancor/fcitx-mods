@@ -362,13 +362,14 @@ inline INPUT_RETURN_VALUE cstore(void *arg) {
     //char s[store_max];
     char sing[2] = {0, 0};
     int store_i = 0;
-    int s_i = 0;
+    //int s_i = 0;
     do {
         if (store[store_i] == 0) break;
         if (store[store_i] < 256) {
             sing[0] = store[store_i];
-            c(arg, sing):
+            c(arg, sing);
             //s[s_i++] = store[store_i];
+            //nanosleep((const struct timespec*){0, 100000000L}, NULL);
         }
     } while (++store_i < store_max);
     //s[s_i] = 0;
