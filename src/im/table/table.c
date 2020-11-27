@@ -357,19 +357,22 @@ inline void c(void *a, char *s) {
     FcitxInstance *i = tbl->owner;
     FcitxInstanceCommitString(i, FcitxInstanceGetCurrentIC(i), s);
 }
-inline INPUT_RETURN_VALUE cstore(void *a) {
+inline INPUT_RETURN_VALUE cstore(void *arg) {
     store[store_n] = 0;
-    char s[store_max];
+    //char s[store_max];
+    char sing[2] = {0, 0};
     int store_i = 0;
     int s_i = 0;
     do {
         if (store[store_i] == 0) break;
         if (store[store_i] < 256) {
-            s[s_i++] = store[store_i];
+            sing[0] = store[store_i];
+            c(arg, sing):
+            //s[s_i++] = store[store_i];
         }
     } while (++store_i < store_max);
-    s[s_i] = 0;
-    c(a, s);
+    //s[s_i] = 0;
+    //c(arg, s);
     store_n = 0;
     return IRV_TO_PROCESS;
 }
@@ -403,6 +406,7 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
             case 'N': e("Ñ")
             case 'c': e("ç")
             case 'h': e("ʻ") // ʻokina (Hawaiʻi)
+            case 's': e("ß")
             case ':': e("ː") // triangular colon (IPA long vowels)
             case 'n': case '1': case '2': case '3': case '4': case '5':
             case '.': case '6': case '9': case ';': case ',': case '/':
