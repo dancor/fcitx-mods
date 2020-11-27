@@ -381,21 +381,22 @@ inline INPUT_RETURN_VALUE cstore(void *a) {
 // Abort a code:
 #define no_match return cstore(arg);
 
-#define lshift 65505
-#define rshift 65506
+//#define lshift 65505
+//#define rshift 65506
 
 INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
 {
-    if (k != lshift && k != rshift && 
-        FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
-    fprintf(stderr, "LOL:DoTableInput %d\t%d\t%d\n", k, store_n, store[0]);
+    //if (k != lshift && k != rshift && 
+    //    FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
+    if (FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
+    //fprintf(stderr, "LOL:DoTableInput %d\t%d\t%d\n", k, store_n, store[0]);
     switch (store_n) {
-    case 0: switch (k) {case '\'': case lshift: case rshift: g
+    case 0: switch (k) {case '\'': g // case lshift: case rshift: g
         default: no_match}
     case 1: switch(store[0]) {
-        case lshift: case rshift:
-            if (k >= 'a' && k <= 'z') {char s[2] = {k + 'A' - 'a', 0}; e(s)}
-            else no_match
+        //case lshift: case rshift:
+        //    if (k >= 'a' && k <= 'z') {char s[2] = {k + 'A' - 'a', 0}; e(s)}
+        //    else no_match
         case '\'': switch (k) {
             case '\'': e("'")
             case 'C': e("Ç")
