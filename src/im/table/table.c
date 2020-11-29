@@ -357,7 +357,8 @@ inline void c(void *a, char *s) {
     FcitxInstance *i = tbl->owner;
     FcitxInstanceCommitString(i, FcitxInstanceGetCurrentIC(i), s);
 }
-inline INPUT_RETURN_VALUE cstore(void *arg) {
+inline INPUT_RETURN_VALUE no_match(void *arg) {
+    //if (store_n > 0 && store[store_n - 1] == '\t') return ;
     store[store_n] = 0;
     //char s[store_max];
     char sing[2] = {0, 0};
@@ -383,17 +384,19 @@ inline INPUT_RETURN_VALUE cstore(void *arg) {
 // Grow a code that isn't ended yet:
 #define g {store[store_n++] = k; return IRV_DO_NOTHING;}
 // Abort a code:
-#define no_match return cstore(arg);
+#define no_match return no_match(arg);
 
 //#define lshift 65505
 //#define rshift 65506
+#define backspace 65288
 
 INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
 {
+    if (store_n > 0 && k == backspace) {store_n = 0; return IRV_DO_NOTHING;}
     //if (k != lshift && k != rshift && 
     //    FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
-    if (FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
     //fprintf(stderr, "LOL:DoTableInput %d\t%d\t%d\n", k, store_n, store[0]);
+    if (FcitxHotkeyIsHotKeyModifierCombine(k, state)) return IRV_TO_PROCESS;
     switch (store_n) {
     case 0: switch (k) {case '\'': g // case lshift: case rshift: g
         default: no_match}
@@ -411,7 +414,7 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
             case ':': e("ː") // triangular colon (IPA long vowels)
             case 'n': case '1': case '2': case '3': case '4': case '5':
             case '.': case '6': case '9': case ';': case ',': case '/':
-            case 'A': case 'a': case 'o': g
+            case 'A': case 'O': case 'a': case 'o': g
             default: no_match}
         default: fprintf(stderr, "LOL:DoTableInput:case1ERROR\n");
             return IRV_TO_PROCESS;}
@@ -487,16 +490,18 @@ INPUT_RETURN_VALUE DoTableInput(void* arg, FcitxKeySym k, unsigned int state)
         case 'o': e("ø")
         default: no_match}
     case 'A': switch (k) {
-        case 'E': e("Æ")
+        case 'e': e("Æ")
+        default: no_match}
+    case 'O': switch (k) {
+        case 'e': e("Œ")
         default: no_match}
     case 'a': switch (k) {
         case 'e': e("æ")
         default: no_match}
-    case 'o': switch (k) { // ring
-        case 'A': e("Å") case 'E': e("E̊") case 'I': e("I̊")
-        case 'O': e("O̊") case 'U': e("Ů")
-        case 'a': e("å") case 'e': e("e̊") case 'i': e("i̊")
-        case 'o': e("o̊") case 'u': e("ů")
+    case 'o': switch (k) {
+        case 'A': e("Å") case 'U': e("Ů") // ring
+        case 'a': e("å") case 'u': e("ů")
+        case 'e': e("œ")
         default: no_match}
     }}
     fprintf(stderr, "LOL:UNFORESEEN\n");
